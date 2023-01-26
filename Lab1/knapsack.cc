@@ -38,10 +38,13 @@ std::vector<int> solve(int C, std::vector<Item> items) {
     int w = C;
     int k = items.size();
     std::vector<int> output;
-    while (w > 0) {
+    while (w > 0 && k > 0) {
         if (items[k-1].weight <= w) {
-            output.push_back(k-1);
-            w -= items[k-1].weight;
+            int w2 = w - items[k-1].weight;
+            if (S[k][w] == S[k-1][w2] + items[k-1].value) {
+                output.push_back(k-1);
+                w = w2;
+            }
         }
         k--;
     }
