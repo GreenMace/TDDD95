@@ -3,7 +3,7 @@
 #include <sstream>
 
 class FenwickTree {
-public:    
+public:
     FenwickTree(int n) {
         N = n;
         T.assign(n, 0);
