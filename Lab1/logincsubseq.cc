@@ -2,48 +2,44 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <iterator>
+#include <deque>
 
-int getKey(std::map<int, std::vector<int>>& v, std::vector<int> sequence, int l, int r, int elem)
-{
-    while (r - l > 1) {
-        int m = l + (r - l) / 2;
-        if (sequence[v[m].back()] >= elem) {
-            r = m;
-        } else {
-            l = m;
-        }
-    }
-  
-    return r;
-}
+std::deque<int> test(std::vector<int> sequence) {
+    std::vector<int> parents = {-1};
+    std::vector<int> longest = {0};
 
-std::vector<int> solve(std::vector<int> sequence) {
-    std::map<int, std::vector<int>> activeLists;
-
-    activeLists[0] = {0};
     for (int i = 1; i < sequence.size(); i++) {
-        int elem = sequence[i];
-
-        if (elem < sequence[activeLists[0].back()]) {
-            activeLists[0] = {i};
-        } else if (elem > sequence[activeLists.rbegin()->second.back()]) {
-            std::vector<int> seq =  activeLists.rbegin()->second;
-            seq.push_back(i);
-            activeLists[seq.size() - 1] = seq;
+        auto smallestLargerIter = std::lower_bound(longest.begin(), longest.end(), i, [&sequence](int a, int b) {
+            return sequence[a] < sequence[b];
+        });
+        
+        auto n = std::distance(longest.begin(), smallestLargerIter);
+        if (n == longest.size()) {
+            parents.push_back(longest[n-1]);
+            longest.push_back(i);
         } else {
-            int largestSmallerKey = getKey(activeLists, sequence, -1, activeLists.size()-1, elem);
-
-            if (sequence[activeLists[largestSmallerKey].back()] == elem) {
-                largestSmallerKey -= 1;
+            if (n > 0) {
+                parents.push_back(longest[n-1]);
+            } else {
+                parents.push_back(-1);
             }
-
-            std::vector<int> seq = activeLists[largestSmallerKey];
-            seq.push_back(i);
-            activeLists[seq.size() - 1] = seq;
+                
+            if (sequence[i] < sequence[longest[n]]) {
+                longest[n] = i;
+            }
         }
     }
 
-    return activeLists.rbegin()->second;
+    std::deque<int> output = {longest.back()};
+    int parent = parents[longest.back()];
+    while (parent != -1) {
+        output.push_front(parent);
+        parent = parents[parent];
+    }
+
+    return output;
+
 }
 
 int main(int argc, char const *argv[]) {
@@ -57,7 +53,7 @@ int main(int argc, char const *argv[]) {
             sequence.push_back(num);
         }
 
-        std::vector<int> longest = solve(sequence);
+        std::deque<int> longest = test(sequence);
 
         std::cout << longest.size() << "\n";
         for (int i : longest) {
