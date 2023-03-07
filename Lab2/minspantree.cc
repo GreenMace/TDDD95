@@ -4,28 +4,45 @@
 #include <math.h>
 #include <algorithm>
 
-void make_set(int v, std::vector<int> &parent, std::vector<int> &rank) {
-    parent[v] = v;
-    rank[v] = 0;
-}
+class TreeDSU {
+public:
+    TreeDSU(int n) {
+        parent.resize(n);
+        rank.assign(n, 0);
+    };
 
-int find_set(int v, std::vector<int> &parent, std::vector<int> &rank) {
-    if (v == parent[v])
-        return v;
-    return parent[v] = find_set(parent[v], parent, rank);
-}
-
-void union_sets(int a, int b, std::vector<int> &parent, std::vector<int> &rank) {
-    a = find_set(a, parent, rank);
-    b = find_set(b, parent, rank);
-    if (a != b) {
-        if (rank[a] < rank[b])
-            std::swap(a, b);
-        parent[b] = a;
-        if (rank[a] == rank[b])
-            rank[a]++;
+    void make_set(int v) {
+        parent[v] = v;
     }
-}
+
+    int find_set(int v) {
+        if (v == parent[v]) {
+            return v;
+        }
+
+        return parent[v] = find_set(parent[v]);
+    }
+
+    void union_sets(int a, int b) {
+        a = find_set(a);
+        b = find_set(b);
+        if (a != b) {
+            if (rank[a] < rank[b]) {
+                std::swap(a, b);
+            }
+                
+            parent[b] = a;
+            if (rank[a] == rank[b]) {
+                rank[a]++;
+            }
+        }
+    }
+
+private:
+    std::vector<int> parent;
+    std::vector<int> rank;
+
+};
 
 class Edge {
 public:
@@ -45,18 +62,17 @@ public:
 
 std::vector<Edge> kruskal(std::vector<Edge> edges, int n) {
     std::vector<Edge> minTree;
-    std::vector<int> parent(n);
-    std::vector<int> rank(n);
+    TreeDSU tree(n);
     for (int i = 0; i < n; ++i) {
-        make_set(i, parent, rank);
+        tree.make_set(i);
     }
 
     sort(edges.begin(), edges.end());
 
     for (Edge e : edges) {
-        if (find_set(e.u, parent, rank) != find_set(e.v, parent, rank)) {
+        if (tree.find_set(e.u) != tree.find_set(e.v)) {
             minTree.push_back(e);
-            union_sets(e.u, e.v, parent, rank);
+            tree.union_sets(e.u, e.v);
         }
     }
 
