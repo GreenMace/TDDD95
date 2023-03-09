@@ -1,3 +1,19 @@
+/*
+Author: Magnus Hjortswang, maghj433
+
+Problem description: Calculate the shortest path between two nodes in a graph where some edges are only available
+periodically, if such a path exists.
+
+Time complexity: O(m*log(n)) where n is the number of nodes and m is the number of edges. We utilize
+a set which sorts the nodes on the current distance to them from the start node. Extracting, inserting and removing 
+items takes log(n) time. We visit each node at most once, so we need n extractions and m updates, which gives us 
+O(n*log(n) + m*log(n)) = O(m*log(n)) since m > n and we only update along edges. 
+
+
+Usage: Assumes no negative edges exist. 
+*/
+
+
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -6,6 +22,9 @@
 
 const int INF = 1000000000;
 
+
+// Class which stores all information about a given edge (where it leads to, its weight
+// and the time intervals where it is available)
 class Edge {
 public:
     Edge(int n, int w, int t, int p) {
@@ -15,6 +34,8 @@ public:
         P = p;
     }
 
+
+    // Calculate how much time is left until the edge can be used again
     int timeToNextCross(int t) {
         if (t <= t0) {
             return t0-t;
@@ -33,6 +54,7 @@ public:
     int P;
 };
 
+// Class which stores the edges which lead from a given node
 class Node {
 public:
     Node(){};
@@ -44,6 +66,9 @@ public:
     std::vector<Edge> edges;
 };
 
+
+// Calculate the minimum time needed to reach all reachable nodes in the graph from a given start node
+// where some edges might only be used periodically
 void dijkstrasWithTime(std::vector<Node> graph, int start, std::vector<int> & currLength, std::vector<int> & parent) {
     int n = graph.size();
 
@@ -53,6 +78,8 @@ void dijkstrasWithTime(std::vector<Node> graph, int start, std::vector<int> & cu
     
     std::set<std::pair<int, int>> q;
     q.insert({0, start});
+
+    // Update the distance to all nodes until no updates are possible
     while (!q.empty()) {
         int v = q.begin() -> second;
         q.erase(q.begin());
@@ -62,6 +89,7 @@ void dijkstrasWithTime(std::vector<Node> graph, int start, std::vector<int> & cu
             int len = edge.weight;
             int waitTime = edge.timeToNextCross(currLength[v]);
 
+            // Update the distance to destination node
             if (currLength[v] + len + waitTime < currLength[to]) {
                 q.erase({currLength[to], to});
                 currLength[to] = currLength[v] + len + waitTime;
@@ -72,6 +100,7 @@ void dijkstrasWithTime(std::vector<Node> graph, int start, std::vector<int> & cu
     }
 }
 
+// Reconstruct the shortest path between the start node and a given end node, if one exists
 std::vector<int> restorePath(int start, int end, std::vector<int> const& parent) {
     std::vector<int> path;
 

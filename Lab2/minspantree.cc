@@ -1,3 +1,16 @@
+/*
+Author: Magnus Hjortswang, maghj433
+
+Problem description: Calculate the shortest path between all pairs of nodes in a graph which might include negative
+cycles, if such a path exists.
+
+Time complexity: O(n^3) where n is the number of nodes, due to the 3 nested loops in the Floyd Warshall algorithm,
+which all iterate over all nodes.
+
+Usage: Assumes all weights are integers.
+*/
+
+
 #include <iostream>
 #include <vector>
 #include <utility>
