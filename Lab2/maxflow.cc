@@ -1,3 +1,15 @@
+/*
+Author: Magnus Hjortswang, maghj433
+
+Problem description: Calculate the maximum flow through a graph where the directed edges each have a maximum throughput.
+
+Time complexity: O(m*f) where m is the number of edges and f is the maximum flow. The minimum increase of flow between
+iterations is 1, which means at most f iterations are needed (O(f)). In each iteration a breadth first search is used
+to find a path which increases flow (O(m)). This means the total time complexity is O(m*f).
+
+Usage: The maximum throughput of all edges must be positive.
+*/
+
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -9,9 +21,12 @@ const int INF = 1000000000;
 std::vector<std::vector<int>> adj;
 std::vector<std::vector<int>> fl;
 
+// Breadth first search for finding a path, from the start node to the terminal node, which can increase the flow
 int bfs(int s, int t, std::vector<int>& parent, std::vector<std::vector<int>> &capacity) {
+    // parent stores the path so that it can be reconstructed
     fill(parent.begin(), parent.end(), -1);
     parent[s] = -2;
+
     std::queue<std::pair<int, int>> q;
     q.push({s, INF});
 
@@ -34,11 +49,14 @@ int bfs(int s, int t, std::vector<int>& parent, std::vector<std::vector<int>> &c
     return 0;
 }
 
+// Calculate the maximum flow from the start node to the terminal node. The maximum flow is returned, and the flow
+// through each edge is stored in the matrix fl.
 int maxflow(int s, int t, std::vector<std::vector<int>> &capacity) {
     int flow = 0;
     std::vector<int> parent(n);
     int new_flow;
 
+    // Iterate untill flow cannot increase
     while (new_flow = bfs(s, t, parent, capacity)) {
         flow += new_flow;
         int cur = t;

@@ -1,13 +1,14 @@
 /*
 Author: Magnus Hjortswang, maghj433
 
-Problem description: Calculate the shortest path between all pairs of nodes in a graph which might include negative
-cycles, if such a path exists.
+Problem description: Construct the minimum spanning tree for a given graph.
 
-Time complexity: O(n^3) where n is the number of nodes, due to the 3 nested loops in the Floyd Warshall algorithm,
-which all iterate over all nodes.
+Time complexity: O(m*log(m)) where n is the number of nodes and m is the number of edges. Using a DSU tree structure we 
+create n separate trees (O(n)) and sort the edges in ascending order (O(m*log(m)). We then iterate through all edges and 
+determine if the ends of each set belong to the same tree (close to O(1)). We then union the trees if they belonged to 
+different sets (also close to  O(1)). This gives us the complexity O(m*log(m) + N + M) = O(m*log(m))
 
-Usage: Assumes all weights are integers.
+Usage: Does not calculate the weight of the constructed tree.
 */
 
 
@@ -17,6 +18,7 @@ Usage: Assumes all weights are integers.
 #include <math.h>
 #include <algorithm>
 
+// Class that handles all disjoint set union operations.
 class TreeDSU {
 public:
     TreeDSU(int n) {
@@ -24,10 +26,12 @@ public:
         rank.assign(n, 0);
     };
 
+    // Initialize trees
     void make_set(int v) {
         parent[v] = v;
     }
 
+    // Find the root of the tree which contains node v
     int find_set(int v) {
         if (v == parent[v]) {
             return v;
@@ -36,6 +40,7 @@ public:
         return parent[v] = find_set(parent[v]);
     }
 
+    // Union two trees such that they share the same root node
     void union_sets(int a, int b) {
         a = find_set(a);
         b = find_set(b);
@@ -57,6 +62,7 @@ private:
 
 };
 
+// Class which stores the information for a given edge (i.e which nodes it connects and the weight)
 class Edge {
 public:
     Edge(int n1, int n2, double w) {
@@ -65,6 +71,7 @@ public:
         weight = w;
     }
 
+    // Comparison operator for sorting in ascending order of weight
     bool operator<(Edge const& other) {
         return weight < other.weight;
     }
@@ -73,6 +80,8 @@ public:
     double weight;
 };
 
+// Construct the minimum spanning tree using kruskal's algorithm. 
+// Uses DSU trees for checking if two nodes are connected, and to connect nodes.
 std::vector<Edge> kruskal(std::vector<Edge> edges, int n) {
     std::vector<Edge> minTree;
     TreeDSU tree(n);
